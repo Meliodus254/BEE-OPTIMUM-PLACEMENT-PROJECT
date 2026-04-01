@@ -1,0 +1,40 @@
+# ============================================================
+#  Bee Optimum Placement Project – Python Dependencies
+# ============================================================
+#  Install with:
+#    pip install -r requirements.txt
+#
+#  Recommended Python version: 3.10 or 3.11
+# ============================================================
+
+# Core science
+numpy>=1.24
+pandas>=2.0
+scipy>=1.11
+
+# Geospatial
+geopandas>=0.14
+shapely>=2.0
+pyproj>=3.6
+fiona>=1.9
+
+# NetCDF / raster
+xarray>=2023.6
+netCDF4>=1.6
+h5netcdf>=1.2       # alternative NetCDF backend (optional)
+rioxarray>=0.15     # raster I/O extensions (optional)
+
+# Machine Learning
+scikit-learn>=1.3
+
+# Mapping
+folium>=0.15
+branca>=0.7
+
+# Plotting
+matplotlib>=3.7
+seaborn>=0.13
+
+# Utilities
+tqdm>=4.66
+requests>=2.31
