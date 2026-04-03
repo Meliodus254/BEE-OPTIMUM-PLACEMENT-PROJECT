@@ -143,16 +143,4 @@ Edit `config.py` to adjust:
 
 ---
 
-## Troubleshooting
-
-| Problem | Fix |
-|---------|-----|
-| `FileNotFoundError: NetCDF file not found` | Check file names in `config.py` match exactly |
-| `MemoryError` on roads/buildings | Reduce `GRID_RESOLUTION` to 0.15 or filter to smaller region |
-| Empty map | Run pipeline first; `preview_map.html` works without pipeline |
-| Slow runtime | Use `--skip-training` flag after first run |
-
----
-
-*Built for Kenya beekeeping site selection using ERA5 climate reanalysis
-and OpenStreetMap geospatial data.*
+a.*
