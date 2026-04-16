@@ -1,0 +1,39 @@
+{
+  "n_eval_observations": 278,
+  "n_background_negatives": 278,
+  "physics": {
+    "auc": 0.5853798975208323,
+    "precision_at_k": 0.6007194244604317,
+    "recall_at_optimal_threshold": 0.6690647482014388,
+    "pct_eval_in_prime": 42.086330935251794,
+    "pct_eval_in_optimal_plus": 66.90647482014388,
+    "mean_dist_to_optimal_zone_km": 6.887524947384784,
+    "mean_dist_to_prime_zone_km": 8.831937786011505
+  },
+  "ml": {
+    "auc": 0.5925029760364371,
+    "precision_at_k": 0.6079136690647482,
+    "recall_at_optimal_threshold": 0.6690647482014388,
+    "pct_eval_in_prime": 50.0,
+    "pct_eval_in_optimal_plus": 66.90647482014388,
+    "mean_dist_to_optimal_zone_km": 6.887524947384784,
+    "mean_dist_to_prime_zone_km": 8.934036007776681
+  },
+  "tier_calibration_ml": [
+    {
+      "tier_ml": "Fair/Poor",
+      "mean": 0.7419354838709677,
+      "count": 124
+    },
+    {
+      "tier_ml": "Optimal",
+      "mean": 0.1843137254901961,
+      "count": 255
+    },
+    {
+      "tier_ml": "Prime",
+      "mean": 0.7853107344632768,
+      "count": 177
+    }
+  ]
+}

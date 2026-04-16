@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bee Suitability Map - Kenya</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" crossorigin="" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" crossorigin="" />
+  <link rel="stylesheet" href="map-styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <p class="loading-text">Loading suitability data...</p>
+    <p class="loading-hint">Serve this project over HTTP if this hangs.</p>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <header class="brand">
+      <span class="brand-icon" aria-hidden="true">🐝</span>
+      <div>
+        <h1>Bee placement explorer</h1>
+        <p class="subtitle">SRTM + climate + ML suitability</p>
+      </div>
+    </header>
+
+    <section class="panel search-panel">
+      <label class="panel-title" for="search-box">Find a place</label>
+      <div class="search-wrap">
+        <div class="search-input-row">
+          <input id="search-box" type="search" placeholder="Town, county, park..." autocomplete="off" spellcheck="false" aria-expanded="false" />
+          <button type="button" id="search-clear" class="search-clear" title="Clear" hidden aria-label="Clear search">x</button>
+        </div>
+        <p class="search-kbd-hint">Up/Down highlight - Enter pick - Esc close</p>
+        <div id="search-loading" class="search-loading" hidden>Searching...</div>
+        <div id="search-results" class="search-results" role="listbox" hidden></div>
+      </div>
+    </section>
+
+    <section id="area-zones-panel" class="panel area-zones hidden">
+      <div class="area-zones-head">
+        <h2 class="panel-title">Bee zones in area</h2>
+        <button type="button" id="area-clear" class="area-clear-btn">Clear</button>
+      </div>
+      <p id="area-title" class="area-title"></p>
+      <div class="area-zones-stats">
+        <div><strong id="az-n">-</strong><span>points</span></div>
+        <div><strong id="az-prime">-</strong><span>prime</span></div>
+        <div><strong id="az-opt">-</strong><span>optimal</span></div>
+        <div><strong id="az-mean">-</strong><span>mean</span></div>
+      </div>
+      <p class="panel-title" style="margin-top:10px">Best here</p>
+      <div id="area-spots" class="area-spots"></div>
+    </section>
+
+    <section class="panel stats" id="stats-panel">
+      <h2 class="panel-title">Summary</h2>
+      <div class="stat-grid">
+        <div class="stat"><span id="st-prime" class="stat-num">-</span><span class="stat-label">Prime</span></div>
+        <div class="stat"><span id="st-opt" class="stat-num">-</span><span class="stat-label">Optimal+</span></div>
+        <div class="stat"><span id="st-visible" class="stat-num">-</span><span class="stat-label">Visible points</span></div>
+        <div class="stat"><span id="st-mean" class="stat-num">-</span><span class="stat-label">Mean score</span></div>
+      </div>
+    </section>
+
+    <section class="panel stats" id="validation-panel">
+      <h2 class="panel-title">Held-out observation validation</h2>
+      <div class="stat-grid">
+        <div class="stat"><span id="val-prime" class="stat-num">-</span><span class="stat-label">Eval in Prime (ML)</span></div>
+        <div class="stat"><span id="val-opt" class="stat-num">-</span><span class="stat-label">Eval in Optimal+ (ML)</span></div>
+        <div class="stat"><span id="val-dist" class="stat-num">-</span><span class="stat-label">Mean dist to optimal</span></div>
+        <div class="stat"><span id="val-n" class="stat-num">-</span><span class="stat-label">Eval observations</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2 class="panel-title">Filters</h2>
+      <div class="row">
+        <label for="min-score">Min ML score</label>
+        <input type="range" id="min-score" min="0" max="100" value="0" />
+        <output id="min-score-out" for="min-score">0.00</output>
+      </div>
+      <div class="row">
+        <label for="max-elev">Max elevation (m)</label>
+        <input type="range" id="max-elev" min="0" max="5000" step="50" value="5000" />
+        <output id="max-elev-out" for="max-elev">5000</output>
+      </div>
+      <div class="toggles">
+        <button type="button" class="toggle active" data-layer="dots">Dots</button>
+        <button type="button" class="toggle" data-layer="cluster">Clusters</button>
+        <button type="button" class="toggle" data-layer="heat">Heat</button>
+      </div>
+      <div class="toggles">
+        <button type="button" class="toggle" id="toggle-eval-obs">Show eval observations</button>
+      </div>
+      <div class="toggles tiles">
+        <button type="button" class="toggle active" data-tile="dark">Dark</button>
+        <button type="button" class="toggle" data-tile="sat">Satellite</button>
+        <button type="button" class="toggle" data-tile="osm">Streets</button>
+      </div>
+    </section>
+
+    <section class="panel grow">
+      <h2 class="panel-title">Top sites <button type="button" id="refresh-top" class="linkish">↻</button></h2>
+      <ol id="top-list" class="top-list"></ol>
+    </section>
+
+    <section class="panel">
+      <h2 class="panel-title">Nearest from my location</h2>
+      <div id="nearest-empty" class="tiny">Tap 📍 to compute nearest recommended sites.</div>
+      <div id="nearby-summary" class="nearby-summary" hidden></div>
+      <ol id="nearest-list" class="top-list nearest-list"></ol>
+    </section>
+
+    <footer class="foot">
+      <button type="button" id="btn-export" class="btn secondary">Export visible CSV</button>
+      <p class="tiny">Data source: <code id="data-source">-</code></p>
+    </footer>
+  </aside>
+
+  <main id="map" class="map" role="application" aria-label="Map"></main>
+
+  <div class="floating-controls" aria-label="Map tools">
+    <button type="button" id="btn-locate" title="My location">📍</button>
+    <button type="button" id="btn-fit" title="Fit Kenya bounds">🇰🇪</button>
+    <button type="button" id="btn-sidebar" title="Toggle panel">☰</button>
+  </div>
+
+  <div id="legend" class="legend">
+    <strong>Suitability</strong>
+    <ul>
+      <li><span class="swatch prime"></span> Prime >= 0.80</li>
+      <li><span class="swatch optimal"></span> Optimal >= 0.65</li>
+      <li><span class="swatch good"></span> Good >= 0.50</li>
+      <li><span class="swatch fair"></span> Fair >= 0.35</li>
+      <li><span class="swatch poor"></span> Poor</li>
+    </ul>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" crossorigin=""></script>
+  <script src="map-app.js" defer></script>
+</body>
+</html>
